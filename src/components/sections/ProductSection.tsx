@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import type { Product } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
+import { useScrollContainer } from '../../contexts/ScrollContext'
 
 interface Props {
   product: Product
@@ -9,8 +10,10 @@ interface Props {
 
 export default function ProductSection({ product }: Props) {
   const ref = useRef<HTMLElement>(null)
+  const container = useScrollContainer()
   const { scrollYProgress } = useScroll({
     target: ref,
+    container,
     offset: ['start end', 'end start'],
   })
   const imgY = useTransform(scrollYProgress, [0, 1], ['8%', '-8%'])
@@ -30,22 +33,23 @@ export default function ProductSection({ product }: Props) {
           background: isCenter
             ? 'radial-gradient(ellipse 50% 60% at 50% 50%, #C9A84C 0%, transparent 70%)'
             : isRight
-            ? 'radial-gradient(ellipse 40% 60% at 70% 50%, #C9A84C 0%, transparent 70%)'
-            : 'radial-gradient(ellipse 40% 60% at 30% 50%, #C9A84C 0%, transparent 70%)',
+            ? 'radial-gradient(ellipse 40% 60% at 72% 50%, #C9A84C 0%, transparent 70%)'
+            : 'radial-gradient(ellipse 40% 60% at 28% 50%, #C9A84C 0%, transparent 70%)',
         }}
       />
 
       <div
-        className={`relative z-10 w-full max-w-7xl mx-auto px-8 flex flex-col ${
+        className={`relative z-10 w-full max-w-6xl mx-auto px-8 md:px-16 flex flex-col gap-8 md:gap-12 ${
           isCenter
-            ? 'items-center text-center gap-8'
+            ? 'items-center text-center'
             : isRight
-            ? 'md:flex-row-reverse items-center gap-8 md:gap-12'
-            : 'md:flex-row items-center gap-8 md:gap-12'
+            ? 'md:flex-row-reverse md:items-center'
+            : 'md:flex-row md:items-center'
         }`}
       >
+        {/* Product Image */}
         <motion.div
-          className={`w-full ${!isCenter ? 'md:w-1/2' : ''} flex justify-center`}
+          className={`flex justify-center ${isCenter ? 'w-full' : 'w-full md:w-1/2'}`}
           style={{ y: imgY }}
           initial={{ opacity: 0, scale: 0.88, x: isRight ? 60 : isCenter ? 0 : -60 }}
           whileInView={{ opacity: 1, scale: 1, x: 0 }}
@@ -55,11 +59,14 @@ export default function ProductSection({ product }: Props) {
           <img
             src={product.image}
             alt={product.name}
-            className="w-64 md:w-96 xl:w-[420px] object-contain drop-shadow-2xl"
+            className={`object-contain drop-shadow-2xl ${
+              isCenter ? 'w-64 md:w-80 xl:w-96' : 'w-64 md:w-80 xl:w-[380px]'
+            }`}
           />
         </motion.div>
 
-        <div className={`w-full ${!isCenter ? 'md:w-1/2' : 'max-w-xl mx-auto'} ${!isCenter ? 'pt-4 md:pt-0' : ''}`}>
+        {/* Text Content */}
+        <div className={isCenter ? 'w-full max-w-lg' : 'w-full md:w-1/2'}>
           <motion.p
             className="text-gold tracking-[0.3em] text-xs uppercase mb-3"
             initial={{ opacity: 0, y: 20 }}
@@ -80,7 +87,7 @@ export default function ProductSection({ product }: Props) {
             {product.name}
           </motion.h2>
 
-          <GoldLine className="w-16 mb-6" delay={0.3} />
+          <GoldLine className={`w-16 mb-6 ${isCenter ? 'mx-auto' : ''}`} delay={0.3} />
 
           <motion.p
             className="text-gold-light text-lg md:text-xl font-display font-normal mb-4"
@@ -93,7 +100,9 @@ export default function ProductSection({ product }: Props) {
           </motion.p>
 
           <motion.p
-            className="text-text-muted text-base leading-relaxed font-light mb-8 max-w-md"
+            className={`text-text-muted text-base leading-relaxed font-light mb-8 ${
+              isCenter ? 'max-w-md mx-auto' : 'max-w-md'
+            }`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-10%' }}
@@ -102,7 +111,7 @@ export default function ProductSection({ product }: Props) {
             {product.description}
           </motion.p>
 
-          <div className="flex flex-wrap gap-3">
+          <div className={`flex flex-wrap gap-3 ${isCenter ? 'justify-center' : ''}`}>
             {product.notes.map((note, i) => (
               <motion.span
                 key={note}
@@ -110,7 +119,7 @@ export default function ProductSection({ product }: Props) {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-10%' }}
-                transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
+                transition={{ duration: 0.5, delay: 0.5 + i * 0.12 }}
               >
                 {note}
               </motion.span>

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import GoldLine from '../ui/GoldLine'
+import { useScrollContainer } from '../../contexts/ScrollContext'
 
 const lines = [
   'Every great cup begins',
@@ -12,11 +13,13 @@ const body =
 
 export default function OriginSection() {
   const ref = useRef<HTMLElement>(null)
+  const container = useScrollContainer()
   const { scrollYProgress } = useScroll({
     target: ref,
+    container,
     offset: ['start end', 'end start'],
   })
-  const bgY = useTransform(scrollYProgress, [0, 1], ['10%', '-10%'])
+  const bgY = useTransform(scrollYProgress, [0, 1], ['15%', '-15%'])
 
   return (
     <section
@@ -25,11 +28,11 @@ export default function OriginSection() {
       style={{ scrollSnapAlign: 'start' }}
     >
       <motion.div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-40"
         style={{
           y: bgY,
           background:
-            'radial-gradient(ellipse 70% 60% at 30% 50%, #2D3B2F 0%, transparent 65%)',
+            'radial-gradient(ellipse 80% 70% at 30% 50%, #1a2e1c 0%, transparent 70%)',
         }}
       />
 
