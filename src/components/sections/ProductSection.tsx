@@ -38,10 +38,10 @@ export default function ProductSection({ product }: Props) {
       <div
         className={`relative z-10 w-full max-w-7xl mx-auto px-8 flex flex-col ${
           isCenter
-            ? 'items-center text-center gap-8 md:flex-col'
+            ? 'items-center text-center gap-8'
             : isRight
-            ? 'md:flex-row-reverse items-center gap-12'
-            : 'md:flex-row items-center gap-12'
+            ? 'md:flex-row-reverse items-center gap-8 md:gap-12'
+            : 'md:flex-row items-center gap-8 md:gap-12'
         }`}
       >
         <motion.div
@@ -59,7 +59,7 @@ export default function ProductSection({ product }: Props) {
           />
         </motion.div>
 
-        <div className={`w-full ${!isCenter ? 'md:w-1/2' : 'max-w-xl mx-auto'}`}>
+        <div className={`w-full ${!isCenter ? 'md:w-1/2' : 'max-w-xl mx-auto'} ${!isCenter ? 'pt-4 md:pt-0' : ''}`}>
           <motion.p
             className="text-gold tracking-[0.3em] text-xs uppercase mb-3"
             initial={{ opacity: 0, y: 20 }}
