@@ -71,17 +71,17 @@ export default function ContactSection() {
           <MessageCircle size={18} />
           Chat on WhatsApp
         </motion.a>
-
-        <motion.p
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-text-muted/40 text-xs tracking-widest uppercase whitespace-nowrap"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, delay: 1 }}
-        >
-          © 2026 Pavaroma · Awaken the True Aroma
-        </motion.p>
       </div>
+
+      <motion.p
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-text-muted/40 text-xs tracking-widest uppercase whitespace-nowrap"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1, delay: 1 }}
+      >
+        © 2026 Pavaroma · Awaken the True Aroma
+      </motion.p>
     </section>
   )
 }

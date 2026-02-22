@@ -45,7 +45,7 @@ export default function ProductSection({ product }: Props) {
         }`}
       >
         <motion.div
-          className="w-full md:w-1/2 flex justify-center"
+          className={`w-full ${!isCenter ? 'md:w-1/2' : ''} flex justify-center`}
           style={{ y: imgY }}
           initial={{ opacity: 0, scale: 0.88, x: isRight ? 60 : isCenter ? 0 : -60 }}
           whileInView={{ opacity: 1, scale: 1, x: 0 }}
@@ -59,7 +59,7 @@ export default function ProductSection({ product }: Props) {
           />
         </motion.div>
 
-        <div className={`w-full md:w-1/2 ${isCenter ? 'max-w-xl' : ''}`}>
+        <div className={`w-full ${!isCenter ? 'md:w-1/2' : 'max-w-xl mx-auto'}`}>
           <motion.p
             className="text-gold tracking-[0.3em] text-xs uppercase mb-3"
             initial={{ opacity: 0, y: 20 }}

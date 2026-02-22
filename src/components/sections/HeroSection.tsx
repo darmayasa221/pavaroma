@@ -40,7 +40,7 @@ export default function HeroSection() {
         <h1 className="font-display text-4xl md:text-7xl xl:text-8xl text-text font-normal leading-tight">
           {taglineWords.map((word, i) => (
             <motion.span
-              key={word}
+              key={i}
               className="inline-block mr-[0.25em]"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}

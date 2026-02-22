@@ -44,11 +44,11 @@ export default function OriginSection() {
           Our Story
         </motion.p>
 
-        <div className="mb-6">
+        <h2 className="font-display text-3xl md:text-5xl text-text font-normal leading-tight mb-6">
           {lines.map((line, i) => (
-            <motion.h2
+            <motion.span
               key={i}
-              className="font-display text-3xl md:text-5xl text-text font-normal leading-tight"
+              className="block"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-15%' }}
@@ -59,9 +59,9 @@ export default function OriginSection() {
               }}
             >
               {line}
-            </motion.h2>
+            </motion.span>
           ))}
-        </div>
+        </h2>
 
         <GoldLine className="w-12 mx-auto mb-8" delay={0.4} />
 
