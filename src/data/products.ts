@@ -1,3 +1,7 @@
+import arabicaImg from '../assets/products/arabica.jpg'
+import robustaImg from '../assets/products/robusta.jpg'
+import blendImg from '../assets/products/blend.jpg'
+
 export type ProductLayout = 'left' | 'right' | 'center'
 
 export interface Product {
@@ -20,7 +24,7 @@ export const products: Product[] = [
     description:
       'Single-origin beans from the highlands — delivering a bright, nuanced cup with a natural sweetness that lingers.',
     notes: ['Floral', 'Bright Acidity', 'Natural Sweetness'],
-    image: '/src/assets/products/arabica.jpg',
+    image: arabicaImg,
     layout: 'right',
   },
   {
@@ -31,7 +35,7 @@ export const products: Product[] = [
     description:
       'High-caffeine, low-acid beans with a rich, earthy depth — the unmistakable backbone of a powerful espresso.',
     notes: ['Earthy Depth', 'High Caffeine', 'Dark Chocolate'],
-    image: '/src/assets/products/robusta.jpg',
+    image: robustaImg,
     layout: 'left',
   },
   {
@@ -42,7 +46,7 @@ export const products: Product[] = [
     description:
       'A masterfully balanced blend — where the brightness of Arabica meets the boldness of Robusta in perfect harmony.',
     notes: ['Balanced', 'Full Crema', 'Smooth Finish'],
-    image: '/src/assets/products/blend.jpg',
+    image: blendImg,
     layout: 'center',
   },
 ]
