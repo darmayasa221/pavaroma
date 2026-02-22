@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import HeroSection from './components/sections/HeroSection'
 import OriginSection from './components/sections/OriginSection'
 import ProductSection from './components/sections/ProductSection'
@@ -8,12 +9,15 @@ import { products } from './data/products'
 const SECTIONS = ['hero', 'origin', 'arabica', 'robusta', 'blend', 'contact']
 
 export default function App() {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   return (
     <div
+      ref={containerRef}
       className="snap-container h-dvh overflow-y-scroll"
       style={{ scrollSnapType: 'y mandatory' }}
     >
-      <NavDots sections={SECTIONS} />
+      <NavDots sections={SECTIONS} containerRef={containerRef} />
       <HeroSection />
       <OriginSection />
       {products.map((product) => (

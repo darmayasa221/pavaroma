@@ -2,29 +2,30 @@ import { useState, useEffect } from 'react'
 
 interface NavDotsProps {
   sections: string[]
+  containerRef: React.RefObject<HTMLDivElement | null>
 }
 
-export default function NavDots({ sections }: NavDotsProps) {
+export default function NavDots({ sections, containerRef }: NavDotsProps) {
   const [active, setActive] = useState(0)
 
   useEffect(() => {
-    const container = document.querySelector('.snap-container')
+    const container = containerRef.current
     if (!container) return
 
     const handler = () => {
-      const scrollTop = container.scrollTop
-      const height = window.innerHeight
-      const index = Math.round(scrollTop / height)
+      const height = container.clientHeight
+      const index = Math.round(container.scrollTop / height)
       setActive(index)
     }
 
     container.addEventListener('scroll', handler, { passive: true })
     return () => container.removeEventListener('scroll', handler)
-  }, [])
+  }, [containerRef])
 
   const scrollTo = (index: number) => {
-    const container = document.querySelector('.snap-container')
-    container?.scrollTo({ top: index * window.innerHeight, behavior: 'smooth' })
+    const container = containerRef.current
+    if (!container) return
+    container.scrollTo({ top: index * container.clientHeight, behavior: 'smooth' })
   }
 
   return (

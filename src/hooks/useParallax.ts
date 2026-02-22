@@ -13,12 +13,12 @@ interface ParallaxResult {
  * speed=0.15 means it moves 15% of the section height = subtle parallax.
  */
 export function useParallax(speed = 0.15): ParallaxResult {
-  const ref = useRef<HTMLElement>(null)
+  const ref = useRef<HTMLElement | null>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   })
   const travel = speed * 100
   const y = useTransform(scrollYProgress, [0, 1], [`${travel}%`, `-${travel}%`])
-  return { ref: ref as React.RefObject<HTMLElement | null>, y }
+  return { ref, y }
 }
