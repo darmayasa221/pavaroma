@@ -1,11 +1,13 @@
 import { motion } from 'motion/react'
 import { MessageCircle } from 'lucide-react'
-import { WHATSAPP_NUMBER, WHATSAPP_MESSAGE } from '../../data/products'
+import { WHATSAPP_NUMBER } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
 import AmbientLight from '../ui/AmbientLight'
+import { useLang } from '../../contexts/LangContext'
 
 export default function ContactSection() {
-  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
+  const { t } = useLang()
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('whatsapp.message'))}`
 
   return (
     <section
@@ -26,7 +28,7 @@ export default function ContactSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          Get in Touch
+          {t('contact.eyebrow')}
         </motion.p>
 
         <motion.h2
@@ -36,7 +38,7 @@ export default function ContactSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.9, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          Let's Talk Coffee.
+          {t('contact.heading')}
         </motion.h2>
 
         <GoldLine className="w-12 mx-auto mb-8" delay={0.3} />
@@ -48,8 +50,7 @@ export default function ContactSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          Whether you're a café, a roaster, or simply someone who loves great
-          coffee — we'd love to hear from you.
+          {t('contact.body')}
         </motion.p>
 
         <motion.a
@@ -68,7 +69,7 @@ export default function ContactSection() {
           whileTap={{ scale: 0.97 }}
         >
           <MessageCircle size={18} />
-          Chat on WhatsApp
+          {t('contact.cta')}
         </motion.a>
       </div>
 
@@ -79,7 +80,7 @@ export default function ContactSection() {
         viewport={{ once: true }}
         transition={{ duration: 1, delay: 1 }}
       >
-        © 2026 Pavaroma · Awaken the True Aroma
+        {t('contact.footer')}
       </motion.p>
     </section>
   )
