@@ -1,8 +1,10 @@
 import { motion } from 'motion/react'
-import { WHATSAPP_NUMBER, WHATSAPP_MESSAGE } from '../../data/products'
+import { WHATSAPP_NUMBER } from '../../data/products'
+import { useLang } from '../../contexts/LangContext'
 
 export default function WhatsAppFAB() {
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
+  const { t } = useLang()
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('whatsapp.message'))}`
 
   return (
     /* Outer fixed anchor — never animates, just positions */
@@ -62,7 +64,7 @@ export default function WhatsAppFAB() {
 
             {/* Label — desktop only */}
             <span className="hidden sm:inline text-sm font-medium whitespace-nowrap">
-              Chat with us
+              {t('whatsapp.label')}
             </span>
           </motion.a>
         </div>
