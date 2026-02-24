@@ -5,12 +5,14 @@ import { WHATSAPP_NUMBER } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
 import AmbientLight from '../ui/AmbientLight'
 import { useScrollContainer } from '../../contexts/ScrollContext'
+import { useLang } from '../../contexts/LangContext'
 
 interface Props {
   product: Product
 }
 
 export default function ProductSection({ product }: Props) {
+  const { t } = useLang()
   const ref = useRef<HTMLElement>(null)
   const container = useScrollContainer()
   const { scrollYProgress } = useScroll({
@@ -111,7 +113,7 @@ export default function ProductSection({ product }: Props) {
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            {product.tagline}
+            {t(`product.${product.id}.tagline`)}
           </motion.p>
 
           <motion.p
@@ -123,20 +125,20 @@ export default function ProductSection({ product }: Props) {
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            {product.description}
+            {t(`product.${product.id}.description`)}
           </motion.p>
 
           <div className={`flex flex-wrap gap-3 ${isCenter ? 'justify-center' : ''}`}>
-            {product.notes.map((note, i) => (
+            {([0, 1, 2] as const).map((i) => (
               <motion.span
-                key={note}
+                key={i}
                 className="text-xs tracking-[0.2em] uppercase text-gold border border-gold/30 px-3 py-1.5"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-10%' }}
                 transition={{ duration: 0.5, delay: 0.5 + i * 0.12 }}
               >
-                {note}
+                {t(`product.${product.id}.note.${i}`)}
               </motion.span>
             ))}
           </div>
@@ -150,15 +152,15 @@ export default function ProductSection({ product }: Props) {
               transition={{ duration: 0.8, delay: 0.8 }}
             >
               <p className="text-text-muted text-sm font-body mb-3">
-                Want a different ratio? We craft custom blends to your preference.
+                {t('product.blend.customText')}
               </p>
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Pavaroma, I'd like to request a custom blend ratio.")}`}
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('product.blend.customMsg'))}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-gold text-xs tracking-[0.18em] uppercase hover:text-gold-light transition-colors duration-300"
               >
-                Request Custom Blend
+                {t('product.blend.customCta')}
                 <span className="text-base leading-none">→</span>
               </a>
             </motion.div>
