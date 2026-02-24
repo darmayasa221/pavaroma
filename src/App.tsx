@@ -6,8 +6,10 @@ import ProductSection from './components/sections/ProductSection'
 import ContactSection from './components/sections/ContactSection'
 import NavDots from './components/ui/NavDots'
 import WhatsAppFAB from './components/ui/WhatsAppFAB'
+import LangToggle from './components/ui/LangToggle'
 import { products } from './data/products'
 import { ScrollContext } from './contexts/ScrollContext'
+import { LangProvider } from './contexts/LangContext'
 
 const SECTIONS = ['hero', 'origin', 'roasting', 'arabica', 'robusta', 'blend', 'contact']
 
@@ -15,22 +17,25 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <ScrollContext.Provider value={containerRef}>
-      <WhatsAppFAB />
-      <div
-        ref={containerRef}
-        className="snap-container h-dvh overflow-y-scroll"
-        style={{ scrollSnapType: 'y mandatory' }}
-      >
-        <NavDots sections={SECTIONS} containerRef={containerRef} />
-        <HeroSection />
-        <OriginSection />
-        <RoastingSection />
-        {products.map((product) => (
-          <ProductSection key={product.id} product={product} />
-        ))}
-        <ContactSection />
-      </div>
-    </ScrollContext.Provider>
+    <LangProvider>
+      <ScrollContext.Provider value={containerRef}>
+        <LangToggle />
+        <WhatsAppFAB />
+        <div
+          ref={containerRef}
+          className="snap-container h-dvh overflow-y-scroll"
+          style={{ scrollSnapType: 'y mandatory' }}
+        >
+          <NavDots sections={SECTIONS} containerRef={containerRef} />
+          <HeroSection />
+          <OriginSection />
+          <RoastingSection />
+          {products.map((product) => (
+            <ProductSection key={product.id} product={product} />
+          ))}
+          <ContactSection />
+        </div>
+      </ScrollContext.Provider>
+    </LangProvider>
   )
 }
