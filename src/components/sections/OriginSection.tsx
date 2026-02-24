@@ -4,16 +4,10 @@ import { MapPin } from 'lucide-react'
 import GoldLine from '../ui/GoldLine'
 import AmbientLight from '../ui/AmbientLight'
 import { useScrollContainer } from '../../contexts/ScrollContext'
-
-const lines = [
-  'Every great cup begins',
-  'in the highlands of Pupuan.',
-]
-
-const body =
-  "Our roots run deep in Desa Pujungan, Kecamatan Pupuan, Tabanan — a quiet mountain village in Bali where cool mist, forest shade, and highland altitude shape the character of every bean we carefully roast."
+import { useLang } from '../../contexts/LangContext'
 
 export default function OriginSection() {
+  const { t } = useLang()
   const ref = useRef<HTMLElement>(null)
   const container = useScrollContainer()
   const { scrollYProgress } = useScroll({
@@ -56,7 +50,7 @@ export default function OriginSection() {
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.8 }}
         >
-          Our Story
+          {t('origin.eyebrow')}
         </motion.p>
 
         {/* Location badge */}
@@ -71,11 +65,11 @@ export default function OriginSection() {
           <span>Desa Pujungan, Pupuan · Tabanan, Bali</span>
         </motion.div>
 
-        {/* Heading — wider container so it wraps cleanly on 2 lines */}
+        {/* Heading */}
         <h2 className="font-display text-3xl md:text-5xl text-text font-normal leading-snug mb-8 max-w-3xl mx-auto">
-          {lines.map((line, i) => (
+          {(['origin.heading1', 'origin.heading2'] as const).map((key, i) => (
             <motion.span
-              key={i}
+              key={key}
               className="block"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -86,14 +80,14 @@ export default function OriginSection() {
                 ease: [0.25, 0.46, 0.45, 0.94],
               }}
             >
-              {line}
+              {t(key)}
             </motion.span>
           ))}
         </h2>
 
         <GoldLine className="w-12 mx-auto mb-8" delay={0.6} />
 
-        {/* Body — narrower for comfortable reading width */}
+        {/* Body */}
         <motion.p
           className="text-text-muted text-sm md:text-base leading-relaxed font-body font-light max-w-sm md:max-w-md mx-auto px-4 md:px-0"
           initial={{ opacity: 0, y: 20 }}
@@ -101,7 +95,7 @@ export default function OriginSection() {
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 1, delay: 0.7 }}
         >
-          {body}
+          {t('origin.body')}
         </motion.p>
       </div>
     </section>
