@@ -3,8 +3,11 @@ import ScrollCue from '../ui/ScrollCue'
 import GoldLine from '../ui/GoldLine'
 import AmbientLight from '../ui/AmbientLight'
 import logoImg from '../../assets/products/logo.png'
+import { useLang } from '../../contexts/LangContext'
 
 export default function HeroSection() {
+  const { t } = useLang()
+
   return (
     <section
       className="relative h-dvh flex flex-col items-center justify-center overflow-hidden bg-bg"
@@ -49,7 +52,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 1.0, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          Awaken the True Aroma.
+          {t('hero.tagline')}
         </motion.p>
 
         <GoldLine className="w-16" delay={1.3} />
@@ -61,7 +64,7 @@ export default function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.0, delay: 1.6 }}
         >
-          Premium Roasted Coffee
+          {t('hero.category')}
         </motion.p>
       </div>
 
