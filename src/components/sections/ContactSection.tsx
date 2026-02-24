@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { MessageCircle } from 'lucide-react'
 import { WHATSAPP_NUMBER, WHATSAPP_MESSAGE } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
+import AmbientLight from '../ui/AmbientLight'
 
 export default function ContactSection() {
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
@@ -11,12 +12,10 @@ export default function ContactSection() {
       className="relative h-dvh flex flex-col items-center justify-center overflow-hidden bg-bg px-6"
       style={{ scrollSnapAlign: 'start' }}
     >
-      <div
-        className="absolute inset-0 opacity-15 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 50% 40% at 50% 50%, #C9A84C 0%, transparent 65%)',
-        }}
+      <AmbientLight
+        gradient="radial-gradient(ellipse 55% 45% at 50% 50%, #C9A84C 0%, transparent 65%)"
+        opacity={0.15}
+        duration={15}
       />
 
       <div className="relative z-10 text-center max-w-xl mx-auto">

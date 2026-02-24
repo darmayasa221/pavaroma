@@ -29,7 +29,7 @@ export default function NavDots({ sections, containerRef }: NavDotsProps) {
   }
 
   return (
-    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3">
+    <div className="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-3">
       {sections.map((_, i) => (
         <button
           key={i}

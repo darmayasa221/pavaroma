@@ -14,12 +14,6 @@
   --font-body:    "DM Sans", system-ui, sans-serif;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 html {
   background: #080808;
   color: #F5F0E8;

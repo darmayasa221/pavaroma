@@ -1,7 +1,9 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import type { Product } from '../../data/products'
+import { WHATSAPP_NUMBER } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
+import AmbientLight from '../ui/AmbientLight'
 import { useScrollContainer } from '../../contexts/ScrollContext'
 
 interface Props {
@@ -27,15 +29,16 @@ export default function ProductSection({ product }: Props) {
       className="relative h-dvh flex items-center overflow-hidden bg-bg"
       style={{ scrollSnapAlign: 'start' }}
     >
-      <div
-        className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{
-          background: isCenter
-            ? 'radial-gradient(ellipse 50% 60% at 50% 50%, #C9A84C 0%, transparent 70%)'
+      <AmbientLight
+        gradient={
+          isCenter
+            ? 'radial-gradient(ellipse 55% 65% at 50% 50%, #C9A84C 0%, transparent 70%)'
             : isRight
-            ? 'radial-gradient(ellipse 40% 60% at 72% 50%, #C9A84C 0%, transparent 70%)'
-            : 'radial-gradient(ellipse 40% 60% at 28% 50%, #C9A84C 0%, transparent 70%)',
-        }}
+            ? 'radial-gradient(ellipse 45% 65% at 72% 50%, #C9A84C 0%, transparent 70%)'
+            : 'radial-gradient(ellipse 45% 65% at 28% 50%, #C9A84C 0%, transparent 70%)'
+        }
+        opacity={0.1}
+        duration={isCenter ? 17 : isRight ? 14 : 15}
       />
 
       <div
@@ -78,7 +81,7 @@ export default function ProductSection({ product }: Props) {
           </motion.p>
 
           <motion.h2
-            className="font-display text-5xl md:text-6xl xl:text-7xl text-text font-normal italic leading-none mb-4"
+            className="font-display text-5xl md:text-6xl xl:text-7xl text-text font-normal italic leading-none mb-3"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-10%' }}
@@ -86,6 +89,18 @@ export default function ProductSection({ product }: Props) {
           >
             {product.name}
           </motion.h2>
+
+          {product.ratio && (
+            <motion.p
+              className="text-gold/70 tracking-[0.2em] text-xs uppercase mb-4 font-body"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-10%' }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            >
+              {product.ratio}
+            </motion.p>
+          )}
 
           <GoldLine className={`w-16 mb-6 ${isCenter ? 'mx-auto' : ''}`} delay={0.3} />
 
@@ -125,6 +140,29 @@ export default function ProductSection({ product }: Props) {
               </motion.span>
             ))}
           </div>
+
+          {product.ratio && (
+            <motion.div
+              className="mt-7 pt-6 border-t border-gold/20"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-10%' }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+            >
+              <p className="text-text-muted text-sm font-body mb-3">
+                Want a different ratio? We craft custom blends to your preference.
+              </p>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Pavaroma, I'd like to request a custom blend ratio.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-gold text-xs tracking-[0.18em] uppercase hover:text-gold-light transition-colors duration-300"
+              >
+                Request Custom Blend
+                <span className="text-base leading-none">→</span>
+              </a>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
