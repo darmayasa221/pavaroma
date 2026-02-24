@@ -1,6 +1,6 @@
-import arabicaImg from "../assets/products/arabica.jpg";
-import robustaImg from "../assets/products/robusta.jpg";
-import blendImg from "../assets/products/blend.jpg";
+import arabicaImg from "../assets/products/arabica.png";
+import robustaImg from "../assets/products/robusta.png";
+import blendImg from "../assets/products/blend.png";
 
 export type ProductLayout = "left" | "right" | "center";
 
