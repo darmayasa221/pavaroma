@@ -3,16 +3,10 @@ import { motion, useScroll, useTransform } from 'motion/react'
 import GoldLine from '../ui/GoldLine'
 import AmbientLight from '../ui/AmbientLight'
 import { useScrollContainer } from '../../contexts/ScrollContext'
-
-const specs = [
-  { label: 'Roast Type', value: 'Medium to Dark Roast' },
-  { label: 'Hulling', value: 'Dry Hulling' },
-]
-
-const body =
-  'Yielding a bold, full-bodied character — rich notes of dark chocolate bitterness and a captivating smoky depth that lingers. Crafted for those who appreciate the art of depth in every cup.'
+import { useLang } from '../../contexts/LangContext'
 
 export default function RoastingSection() {
+  const { t } = useLang()
   const ref = useRef<HTMLElement>(null)
   const container = useScrollContainer()
   const { scrollYProgress } = useScroll({
@@ -55,7 +49,7 @@ export default function RoastingSection() {
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.8 }}
         >
-          The Craft
+          {t('roasting.eyebrow')}
         </motion.p>
 
         {/* Heading */}
@@ -66,7 +60,7 @@ export default function RoastingSection() {
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.9, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          Slowly roasted to perfection.
+          {t('roasting.heading')}
         </motion.h2>
 
         <GoldLine className="w-12 mx-auto mb-10" delay={0.4} />
@@ -79,16 +73,16 @@ export default function RoastingSection() {
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          {specs.map((spec) => (
+          {(['roastType', 'hulling'] as const).map((key) => (
             <div
-              key={spec.label}
+              key={key}
               className="border border-gold/25 px-6 py-4 text-left min-w-[140px] md:min-w-[180px]"
             >
               <p className="text-gold text-[10px] tracking-[0.25em] uppercase mb-2 font-body">
-                {spec.label}
+                {t(`roasting.spec.${key}.label`)}
               </p>
               <p className="text-text text-sm md:text-base font-display font-normal leading-snug">
-                {spec.value}
+                {t(`roasting.spec.${key}.value`)}
               </p>
             </div>
           ))}
@@ -102,7 +96,7 @@ export default function RoastingSection() {
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 1, delay: 0.7 }}
         >
-          {body}
+          {t('roasting.body')}
         </motion.p>
       </div>
     </section>
