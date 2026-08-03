@@ -73,6 +73,13 @@
   "product.price": "Harga",
   "product.priceFrom": "Mulai dari",
 
+  "bank.title": "Transfer ke",
+  "bank.holder": "a.n.",
+  "bank.copy": "Salin",
+  "bank.copied": "Tersalin",
+  "bank.copyFailed": "Gagal menyalin. Silakan salin manual.",
+  "bank.hint": "Transfer sesuai total di atas, lalu unggah bukti transfernya. Pesanan diproses setelah pembayaran kami terima.",
+
   "order.title": "Formulir Pemesanan",
   "order.ratio": "Pilih Rasio",
   "order.quantity": "Jumlah (kg)",

@@ -73,6 +73,13 @@
   "product.price": "Price",
   "product.priceFrom": "From",
 
+  "bank.title": "Transfer to",
+  "bank.holder": "a/n",
+  "bank.copy": "Copy",
+  "bank.copied": "Copied",
+  "bank.copyFailed": "Couldn't copy. Please copy it manually.",
+  "bank.hint": "Transfer the total shown above, then upload your payment proof. Orders are processed once payment arrives.",
+
   "order.title": "Place Your Order",
   "order.ratio": "Choose Ratio",
   "order.quantity": "Quantity (kg)",

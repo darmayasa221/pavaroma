@@ -27,3 +27,6 @@ dist-ssr
 # Kredensial lokal — jangan pernah di-commit
 note.txt
 *.secret
+
+# Dokumen referensi (memuat data pelanggan & tanda tangan) — jangan di-commit
+rev/

@@ -53,6 +53,25 @@ const rupiah = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
 const MIN_DELIVERY_DAYS = 3
 const MAX_DELIVERY_DAYS = 90
 
+/** Identitas usaha — dipakai template WhatsApp, nanti juga oleh invoice. */
+const BUSINESS = {
+  name: 'Pavaroma',
+  tagline: 'Awaken the True Aroma',
+  address:
+    'Jl. Diponegoro No.262, Dauh Puri Klod, Kec. Denpasar Bar., Kota Denpasar, Bali 80113',
+  phone: '082144703290',
+  site: 'https://pavaroma.vercel.app',
+  bank: { name: 'BRI', holder: 'YOGA PRATAMA', number: '001701091008505' },
+} as const
+
+/**
+ * Telegram menolak reply markup di atas ~6.000 karakter (diuji: 6.033 lolos,
+ * 10.033 ditolak). Alamat boleh 500 karakter, jadi template panjang masih jauh
+ * di bawah ambang ini — tapi kalau sampai lewat, versi ringkasnya yang dipakai
+ * daripada tombolnya hilang sama sekali.
+ */
+const WA_URL_LIMIT = 5000
+
 /** `YYYY-MM-DD` (UTC) hasil geser n hari dari sekarang. */
 function utcDatePlus(days: number): string {
   const d = new Date()
@@ -153,6 +172,62 @@ function copyBlock(o: OrderNotice): string {
 }
 
 /**
+ * Pesan siap-kirim untuk pelanggan. Isinya berbeda tergantung status bayar:
+ * yang sudah bayar diberi konfirmasi, yang belum diberi nomor rekening dan
+ * nominalnya — justru itu alasan utama menghubungi mereka.
+ *
+ * `ringkas` membuang blok alamat; dipakai hanya kalau alamatnya sangat panjang
+ * sehingga URL tombol Telegram terancam melewati batas.
+ */
+function waTemplate(o: OrderNotice, ringkas = false): string {
+  const rincian = [
+    `Kode Pesanan  : ${o.ref}`,
+    `Produk        : ${o.productName}${o.variant ? ` (${o.variant})` : ''}`,
+    `Jumlah        : ${o.quantityKg} kg`,
+    `Total         : ${rupiah(o.totalPrice)}`,
+    `Tanggal Kirim : ${formatTanggal(o.deliveryDate)}`,
+  ].join('\n')
+
+  const alamat = ringkas ? '' : `\nAlamat pengiriman:\n${o.customerAddress}\n`
+
+  const penutup = `\nSalam hangat,\n${BUSINESS.name} — ${BUSINESS.tagline}`
+
+  if (o.hasPaid) {
+    return (
+      `Halo Kak ${o.customerName}, terima kasih sudah memesan di ${BUSINESS.name} 🙏\n\n` +
+      `Pembayaran Anda sudah kami terima. Berikut rincian pesanannya:\n\n` +
+      `${rincian}\n` +
+      alamat +
+      `\nPesanan sedang kami siapkan dan akan dikirim sesuai tanggal di atas. ` +
+      `Kami kabari lagi begitu paketnya berangkat.\n` +
+      penutup
+    )
+  }
+
+  return (
+    `Halo Kak ${o.customerName}, terima kasih sudah memesan di ${BUSINESS.name} 🙏\n\n` +
+    `Pesanan Anda sudah kami catat. Berikut rinciannya:\n\n` +
+    `${rincian}\n` +
+    alamat +
+    `\nUntuk melanjutkan, silakan transfer ke:\n` +
+    `${BUSINESS.bank.name} a.n. ${BUSINESS.bank.holder}\n` +
+    `${BUSINESS.bank.number}\n` +
+    `Nominal: ${rupiah(o.totalPrice)}\n\n` +
+    `Setelah transfer, mohon kirimkan bukti transfernya ke chat ini ya. ` +
+    `Pesanan langsung kami siapkan begitu pembayaran kami terima.\n` +
+    penutup
+  )
+}
+
+/** Link WhatsApp berisi template siap kirim, dengan pengaman panjang URL. */
+function waLink(o: OrderNotice): string {
+  const buat = (ringkas: boolean) =>
+    `https://wa.me/${o.customerPhone}?text=${encodeURIComponent(waTemplate(o, ringkas))}`
+  const penuh = buat(false)
+  return penuh.length <= WA_URL_LIMIT ? penuh : buat(true)
+}
+
+/**
  * Telegram merender `<pre>` sebagai blok monospace yang bisa disalin sekali
  * ketuk, tanpa batas panjang — beda dengan tombol copy_text yang dibatasi 256
  * karakter. Caption sendPhoto sendiri dibatasi 1024 karakter.
@@ -244,7 +319,7 @@ async function notify(o: OrderNotice): Promise<void> {
       // jadi tombolnya hanya dipasang kalau muat — blok <pre> di pesan tetap
       // bisa disalin utuh berapa pun panjangnya, jadi tidak ada yang hilang.
       const rows: Record<string, unknown>[][] = [
-        [{ text: '💬 Balas via WhatsApp', url: `https://wa.me/${o.customerPhone}` }],
+        [{ text: '💬 Kirim pesan ke pelanggan', url: waLink(o) }],
       ]
       if (info.length <= 256) {
         rows.push([{ text: '📋 Salin info lengkap', copy_text: { text: info } }])

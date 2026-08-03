@@ -12,6 +12,7 @@ import {
   resolveUnitPrice,
 } from '../../data/pricing'
 import { submitOrder, OrderError, MAX_PROOF_BYTES, ACCEPTED_PROOF_TYPES } from '../../lib/orders'
+import BankTransferInfo from './BankTransferInfo'
 import { isSupabaseConfigured } from '../../lib/supabase'
 import { useLang } from '../../contexts/LangContext'
 import GoldLine from '../ui/GoldLine'
@@ -101,15 +102,21 @@ export default function OrderForm({ product }: Props) {
   if (doneRef) {
     return (
       <motion.div
-        className="border border-gold/30 px-6 py-10 text-center"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
+        className="space-y-5"
       >
-        <Check size={32} className="text-gold mx-auto mb-4" />
-        <p className="font-display text-2xl text-text italic mb-2">{t('order.successTitle')}</p>
-        <p className="text-text-muted text-sm font-body mb-4">{t('order.successBody')}</p>
-        <p className="text-gold tracking-[0.3em] text-lg font-display">#{doneRef}</p>
+        <div className="border border-gold/30 px-6 py-10 text-center">
+          <Check size={32} className="text-gold mx-auto mb-4" />
+          <p className="font-display text-2xl text-text italic mb-2">{t('order.successTitle')}</p>
+          <p className="text-text-muted text-sm font-body mb-4">{t('order.successBody')}</p>
+          <p className="text-gold tracking-[0.3em] text-lg font-display">#{doneRef}</p>
+        </div>
+
+        {/* Yang belum bayar masih butuh nomor rekeningnya di layar ini —
+            kalau tidak, mereka harus kembali ke form yang sudah hilang. */}
+        {!hasPaid && <BankTransferInfo />}
       </motion.div>
     )
   }
@@ -237,6 +244,10 @@ export default function OrderForm({ product }: Props) {
           {t('order.deliveryHint').replace('{n}', String(MIN_DELIVERY_DAYS))}
         </p>
       </div>
+
+      {/* Ditaruh SEBELUM pertanyaan "sudah bayar" — pelanggan butuh nomor
+          rekeningnya untuk membayar, bukan setelah menyatakan sudah. */}
+      <BankTransferInfo />
 
       <div>
         <span className={labelCls}>{t('order.paidQuestion')}</span>
