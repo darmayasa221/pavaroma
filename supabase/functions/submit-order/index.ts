@@ -28,7 +28,7 @@ const SINGLE_PRICES: Record<string, number> = {
 const PRODUCT_NAMES: Record<string, string> = {
   arabica: 'Arabica Kintamani',
   robusta: 'Fine Robusta Pupuan',
-  blend: 'House Blend Special',
+  blend: 'House Blend Premium',
 }
 
 function resolveUnitPrice(productId: string, variant: string | null): number | null {
@@ -50,10 +50,6 @@ const json = (body: unknown, status = 200) =>
 
 const rupiah = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
 
-/**
- * 08xx → 628xx. Browser sudah melakukan ini, tapi diulang di sini supaya link
- * `wa.me` di notifikasi tetap benar walau request datang bukan dari form kita.
- */
 const MIN_DELIVERY_DAYS = 3
 const MAX_DELIVERY_DAYS = 90
 
@@ -79,6 +75,10 @@ function formatTanggal(iso: string): string {
   }
 }
 
+/**
+ * 08xx → 628xx. Browser sudah melakukan ini, tapi diulang di sini supaya link
+ * `wa.me` di notifikasi tetap benar walau request datang bukan dari form kita.
+ */
 function normalisePhone(raw: string): string {
   const d = raw.replace(/\D/g, '')
   if (d.startsWith('62')) return d

@@ -7,7 +7,7 @@
 - Products — all Grade 1, Medium to Dark Roast, Semi Wash:
   - **Arabica Kintamani** — Bangli highlands, Bali
   - **Fine Robusta Pupuan** — Tabanan highlands, Bali
-  - **House Blend Special** — customer-chosen ratio, 50:50 to 75:25 Arabica
+  - **House Blend Premium** — customer-chosen ratio, 50:50 to 75:25 Arabica
 - Type: Storytelling landing page + price list. No cart, no checkout — every CTA is a WhatsApp deep link.
 
 ## Stack
