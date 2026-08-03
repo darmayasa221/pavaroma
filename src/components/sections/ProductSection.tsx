@@ -30,7 +30,10 @@ export default function ProductSection({ product }: Props) {
         <motion.img
           src={product.image}
           alt={name}
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          // The source photos are 3:2 landscape with the bag left of centre. In the narrow
+          // mobile panel, object-center would frame the beans and background instead of the
+          // bag, so pull the focal point left. Desktop's wider panel needs no shift.
+          className="absolute inset-0 w-full h-full object-cover object-[20%_center] md:object-center"
           initial={{ opacity: 0, scale: 1.06 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={VIEWPORT}

@@ -30,13 +30,15 @@
 ## Assets
 - Product images in `src/assets/products/`: `arabica.jpg`, `robusta.jpg`, `blend.jpg`, plus `logo.png`
 - Photos stay JPEG — PNG triples the file size for no gain on a photographic image.
-- **Preparing a product photo** (the supplied shots are 1536-wide with the product name typeset
-  into the artwork on the right, which would duplicate the section headline):
-  1. Crop away the typeset name — for the current source that means keeping roughly `x < 915`.
-  2. Pad the dark edges back out so the aspect ratio is **≥ 1.04**. `ProductSection` uses
-     `object-cover`, and the photo panel's aspect reaches ~1.037 on a 16:9 screen. If the image
-     is narrower than the panel, cover crops it *vertically* and lops off the top of the beans
-     and the base of the bag. The padding is sacrificial — cover eats it first.
+- Product photos are used **uncropped, as supplied** (1536-wide, 3:2-ish landscape). The wide
+  aspect matters: `ProductSection` uses `object-cover`, so an image narrower than the photo
+  panel gets cropped *vertically* and loses the top of the beans and the base of the bag.
+  Keep any replacement at aspect ≥ ~1.05.
+- Known trade-off: the artwork has the product name typeset into its right side. At a given
+  viewport only ~575 × (width/height) px of the 1536px source is visible, so below roughly a
+  1850px-wide window that typeset name truncates mid-word. The bag and the typeset name cannot
+  both fit at 1440px. Current setting favours the bag. Fixing this properly needs artwork
+  without the baked-in name (it also says the old product names).
 
 ## Design Decisions
 - 8 scroll-snap sections: hero → origin → roasting → arabica → robusta → blend → price → contact
