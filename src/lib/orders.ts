@@ -8,6 +8,8 @@ export interface OrderDraft {
   customerName: string
   customerPhone: string
   customerAddress: string
+  /** `YYYY-MM-DD`, minimal 3 hari dari hari ini. */
+  deliveryDate: string
   hasPaid: boolean
   proofFile?: File | null
 }
@@ -85,6 +87,7 @@ export async function submitOrder(draft: OrderDraft): Promise<OrderResult> {
         customerName: draft.customerName.trim(),
         customerPhone: normalisePhone(draft.customerPhone),
         customerAddress: draft.customerAddress.trim(),
+        deliveryDate: draft.deliveryDate,
         hasPaid: draft.hasPaid,
         proofPath: proofPath ?? null,
       },

@@ -1,8 +1,16 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
 import { Check, Loader2, Upload, X } from 'lucide-react'
 import type { Product } from '../../data/products'
-import { BLEND_PRICES, blendVariant, DEFAULT_BLEND_VARIANT, formatPrice, resolveUnitPrice } from '../../data/pricing'
+import {
+  BLEND_PRICES,
+  blendVariant,
+  DEFAULT_BLEND_VARIANT,
+  deliveryDateBounds,
+  formatPrice,
+  MIN_DELIVERY_DAYS,
+  resolveUnitPrice,
+} from '../../data/pricing'
 import { submitOrder, OrderError, MAX_PROOF_BYTES, ACCEPTED_PROOF_TYPES } from '../../lib/orders'
 import { isSupabaseConfigured } from '../../lib/supabase'
 import { useLang } from '../../contexts/LangContext'
@@ -27,6 +35,10 @@ export default function OrderForm({ product }: Props) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  // Dihitung sekali per mount: kalau dihitung ulang tiap render, batasnya bisa
+  // bergeser di tengah pengisian saat tengah malam terlewati.
+  const dateBounds = useMemo(() => deliveryDateBounds(), [])
+  const [deliveryDate, setDeliveryDate] = useState('')
   const [hasPaid, setHasPaid] = useState<boolean | null>(null)
   const [proof, setProof] = useState<File | null>(null)
 
@@ -44,6 +56,11 @@ export default function OrderForm({ product }: Props) {
     phone.replace(/\D/g, '').length >= 8 &&
     address.trim().length >= 10 &&
     quantity > 0 &&
+    // Tanggal harus dipilih DAN tidak lebih cepat dari batas. Atribut `min`
+    // pada input date hanya membatasi date-picker; nilai yang diketik manual
+    // tetap lolos, jadi harus dicek di sini juga.
+    deliveryDate >= dateBounds.min &&
+    deliveryDate <= dateBounds.max &&
     hasPaid !== null &&
     (!hasPaid || proof !== null)
 
@@ -61,6 +78,7 @@ export default function OrderForm({ product }: Props) {
         customerName: name,
         customerPhone: phone,
         customerAddress: address,
+        deliveryDate,
         hasPaid: hasPaid!,
         proofFile: proof,
       })
@@ -111,18 +129,31 @@ export default function OrderForm({ product }: Props) {
           <label htmlFor="variant" className={labelCls}>
             {t('order.ratio')}
           </label>
-          <select
-            id="variant"
-            className={`${field} appearance-none`}
-            value={variant}
-            onChange={(e) => setVariant(e.target.value)}
-          >
-            {BLEND_PRICES.map((row) => (
-              <option key={blendVariant(row)} value={blendVariant(row)} className="bg-surface">
-                Arabica {row.arabica}% · Robusta {row.robusta}% — {formatPrice(row.price)}/kg
-              </option>
-            ))}
-          </select>
+          {/* `appearance-none` membuang panah bawaan browser, sehingga select
+              terlihat seperti input biasa. Penanda ini yang memberi tahu
+              pengunjung bahwa isinya bisa dipilih. */}
+          <div className="relative">
+            <select
+              id="variant"
+              className={`${field} appearance-none pr-12 cursor-pointer`}
+              value={variant}
+              onChange={(e) => setVariant(e.target.value)}
+            >
+              {BLEND_PRICES.map((row) => (
+                <option key={blendVariant(row)} value={blendVariant(row)} className="bg-surface">
+                  Arabica {row.arabica}% · Robusta {row.robusta}% — {formatPrice(row.price)}/kg
+                </option>
+              ))}
+            </select>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-4 flex items-center gap-[3px]"
+            >
+              <span className="w-1 h-1 rounded-full bg-gold" />
+              <span className="w-1 h-1 rounded-full bg-gold" />
+              <span className="w-1 h-1 rounded-full bg-gold" />
+            </span>
+          </div>
         </div>
       )}
 
@@ -187,6 +218,24 @@ export default function OrderForm({ product }: Props) {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
+      </div>
+
+      <div>
+        <label htmlFor="delivery" className={labelCls}>
+          {t('order.deliveryDate')}
+        </label>
+        <input
+          id="delivery"
+          type="date"
+          className={`${field} cursor-pointer [color-scheme:dark]`}
+          min={dateBounds.min}
+          max={dateBounds.max}
+          value={deliveryDate}
+          onChange={(e) => setDeliveryDate(e.target.value)}
+        />
+        <p className="text-text-muted/50 text-[10px] font-body mt-2">
+          {t('order.deliveryHint').replace('{n}', String(MIN_DELIVERY_DAYS))}
+        </p>
       </div>
 
       <div>

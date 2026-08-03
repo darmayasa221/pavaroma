@@ -30,6 +30,28 @@ const idr = new Intl.NumberFormat("id-ID");
 /** 230000 → "Rp 230.000" — dot separators in both locales, as printed on the list. */
 export const formatPrice = (value: number): string => `Rp ${idr.format(value)}`;
 
+/** Jarak tersingkat antara order masuk dan tanggal kirim. */
+export const MIN_DELIVERY_DAYS = 3
+/** Sejauh mana pelanggan boleh menjadwalkan ke depan. */
+export const MAX_DELIVERY_DAYS = 90
+
+const pad = (n: number) => String(n).padStart(2, '0')
+
+/**
+ * `YYYY-MM-DD` dalam waktu LOKAL pengunjung — bukan `toISOString()`, yang
+ * memakai UTC dan bisa meleset satu hari bagi pengguna di WITA/WIT.
+ */
+export const toDateInput = (d: Date): string =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+
+export function deliveryDateBounds(from: Date = new Date()): { min: string; max: string } {
+  const min = new Date(from)
+  min.setDate(min.getDate() + MIN_DELIVERY_DAYS)
+  const max = new Date(from)
+  max.setDate(max.getDate() + MAX_DELIVERY_DAYS)
+  return { min: toDateInput(min), max: toDateInput(max) }
+}
+
 /** "75:25" — the wire format for a blend ratio, stored on the order row. */
 export const blendVariant = (row: BlendPrice): string => `${row.arabica}:${row.robusta}`;
 

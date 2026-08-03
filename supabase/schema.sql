@@ -21,6 +21,10 @@ create table if not exists public.orders (
   proof_path     text,                               -- path di bucket payment-proofs
   status         text        not null default 'new'
                  check (status in ('new','confirmed','shipped','done','cancelled')),
+  -- Tanggal kirim pilihan pelanggan. Minimal 3 hari setelah order, divalidasi
+  -- di Edge Function — CHECK constraint tidak bisa dipakai karena harus
+  -- immutable dan tidak boleh memanggil now().
+  delivery_date  date,
   -- null = belum dicoba · 'sent' = berhasil · selain itu = pesan error.
   -- Ini yang membuat provider notifikasi bisa diuji lewat SQL, bukan menebak dari log.
   notify_status  text,
@@ -30,7 +34,10 @@ create table if not exists public.orders (
 
 alter table public.orders
   add column if not exists notify_status text,
-  add column if not exists notified_at   timestamptz;
+  add column if not exists notified_at   timestamptz,
+  add column if not exists delivery_date date;
+
+create index if not exists orders_delivery_date_idx on public.orders (delivery_date);
 
 -- Untuk database yang sudah terlanjur dibuat sebelum kolom alamat ada.
 -- Default '-' hanya menambal baris lama; baris baru selalu diisi form.

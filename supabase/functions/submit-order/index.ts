@@ -54,6 +54,31 @@ const rupiah = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
  * 08xx → 628xx. Browser sudah melakukan ini, tapi diulang di sini supaya link
  * `wa.me` di notifikasi tetap benar walau request datang bukan dari form kita.
  */
+const MIN_DELIVERY_DAYS = 3
+const MAX_DELIVERY_DAYS = 90
+
+/** `YYYY-MM-DD` (UTC) hasil geser n hari dari sekarang. */
+function utcDatePlus(days: number): string {
+  const d = new Date()
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+/** "2026-08-08" → "Sab, 8 Agu 2026" untuk ditampilkan di notifikasi. */
+function formatTanggal(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat('id-ID', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${iso}T00:00:00Z`))
+  } catch {
+    return iso
+  }
+}
+
 function normalisePhone(raw: string): string {
   const d = raw.replace(/\D/g, '')
   if (d.startsWith('62')) return d
@@ -74,6 +99,7 @@ interface OrderNotice {
   customerName: string
   customerPhone: string
   customerAddress: string
+  deliveryDate: string
   hasPaid: boolean
   proofUrl: string | null
 }
@@ -101,6 +127,7 @@ function plainText(o: OrderNotice): string {
     `${o.productName}${o.variant ? ` (${o.variant})` : ''}`,
     `${o.quantityKg} kg × ${rupiah(o.unitPrice)} = ${rupiah(o.totalPrice)}`,
     o.hasPaid ? '✅ Sudah bayar' : '⚠️ BELUM bayar',
+    `🚚 Kirim: ${formatTanggal(o.deliveryDate)}`,
     '',
     `Nama   : ${o.customerName}`,
     `WA     : ${o.customerPhone}`,
@@ -112,11 +139,6 @@ function plainText(o: OrderNotice): string {
 }
 
 /**
- * Telegram: `<code>` bisa disalin sekali ketuk di semua klien Telegram, jadi
- * nomor dan alamat dibungkus dengan itu. Caption sendPhoto dibatasi 1024
- * karakter — nama (100) + alamat (500) masih jauh di bawah, tapi tetap dijaga.
- */
-/**
  * Blok siap-salin untuk ditempel ke aplikasi kurir / nota. Satu ketukan pada
  * blok <pre> menyalin semuanya sekaligus, jadi tidak perlu salin per baris.
  */
@@ -126,9 +148,15 @@ function copyBlock(o: OrderNotice): string {
     `No HP   : ${o.customerPhone}`,
     `Alamat  : ${o.customerAddress}`,
     `Produk  : ${o.productName}${o.variant ? ` · ${o.variant}` : ''} · ${o.quantityKg} kg`,
+    `Kirim   : ${formatTanggal(o.deliveryDate)}`,
   ].join('\n')
 }
 
+/**
+ * Telegram merender `<pre>` sebagai blok monospace yang bisa disalin sekali
+ * ketuk, tanpa batas panjang — beda dengan tombol copy_text yang dibatasi 256
+ * karakter. Caption sendPhoto sendiri dibatasi 1024 karakter.
+ */
 function telegramHtml(o: OrderNotice): string {
   return [
     `🛒 <b>Order Baru</b>  ·  <code>${esc(o.ref)}</code>`,
@@ -136,6 +164,7 @@ function telegramHtml(o: OrderNotice): string {
     `<b>${esc(o.productName)}</b>${o.variant ? ` · ${esc(o.variant)}` : ''}`,
     `${o.quantityKg} kg × ${rupiah(o.unitPrice)} = <b>${rupiah(o.totalPrice)}</b>`,
     o.hasPaid ? '✅ Sudah bayar' : '⚠️ <b>BELUM bayar</b>',
+    `🚚 Kirim: <b>${esc(formatTanggal(o.deliveryDate))}</b>`,
     '',
     `<pre>${esc(copyBlock(o))}</pre>`,
     '<i>Ketuk blok di atas untuk menyalin semua</i>',
@@ -289,6 +318,7 @@ Deno.serve(async (req) => {
   const customerName = String(body.customerName ?? '').trim()
   const customerPhone = normalisePhone(String(body.customerPhone ?? ''))
   const customerAddress = String(body.customerAddress ?? '').trim()
+  const deliveryDate = String(body.deliveryDate ?? '').trim()
   const hasPaid = Boolean(body.hasPaid)
   const proofPath = body.proofPath == null ? null : String(body.proofPath)
 
@@ -305,6 +335,19 @@ Deno.serve(async (req) => {
   }
   if (customerAddress.length < 10 || customerAddress.length > 500) {
     return json({ error: 'Alamat tidak valid' }, 400)
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate) || Number.isNaN(Date.parse(deliveryDate))) {
+    return json({ error: 'Tanggal pengiriman tidak valid' }, 400)
+  }
+  // Batas dihitung dalam UTC, sementara pengunjung memilih dalam waktu lokal.
+  // Diberi kelonggaran 1 hari supaya pemilihan yang sah di zona waktu mana pun
+  // tidak ditolak hanya karena beda tanggal UTC — aturan 3 harinya sudah
+  // ditegakkan di form, ini jaring pengaman terhadap request buatan.
+  if (deliveryDate < utcDatePlus(MIN_DELIVERY_DAYS - 1)) {
+    return json({ error: `Tanggal kirim minimal ${MIN_DELIVERY_DAYS} hari dari sekarang` }, 400)
+  }
+  if (deliveryDate > utcDatePlus(MAX_DELIVERY_DAYS + 1)) {
+    return json({ error: `Tanggal kirim maksimal ${MAX_DELIVERY_DAYS} hari ke depan` }, 400)
   }
 
   const unitPrice = resolveUnitPrice(productId, variant)
@@ -336,6 +379,7 @@ Deno.serve(async (req) => {
     customer_name: customerName,
     customer_phone: customerPhone,
     customer_address: customerAddress,
+    delivery_date: deliveryDate,
     has_paid: hasPaid,
     proof_path: proofPath,
   })
@@ -365,6 +409,7 @@ Deno.serve(async (req) => {
       customerName,
       customerPhone,
       customerAddress,
+      deliveryDate,
       hasPaid,
       proofUrl,
     })
