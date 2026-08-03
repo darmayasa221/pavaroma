@@ -12,20 +12,44 @@ export default function NavDots({ sections, containerRef }: NavDotsProps) {
     const container = containerRef.current
     if (!container) return
 
+    // Sections are min-h-dvh, so any of them can be taller than the viewport
+    // on a short screen. Measure real offsets rather than assuming a uniform height.
+    const offsets = () => {
+      const containerTop = container.getBoundingClientRect().top
+      return [...container.querySelectorAll<HTMLElement>(':scope > section')].map(
+        (s) => s.getBoundingClientRect().top - containerTop + container.scrollTop,
+      )
+    }
+
     const handler = () => {
-      const height = container.clientHeight
-      const index = Math.round(container.scrollTop / height)
+      const midpoint = container.scrollTop + container.clientHeight / 2
+      const tops = offsets()
+      let index = 0
+      tops.forEach((top, i) => {
+        if (top < midpoint) index = i
+      })
       setActive(index)
     }
 
+    handler()
     container.addEventListener('scroll', handler, { passive: true })
-    return () => container.removeEventListener('scroll', handler)
+    window.addEventListener('resize', handler)
+    return () => {
+      container.removeEventListener('scroll', handler)
+      window.removeEventListener('resize', handler)
+    }
   }, [containerRef])
 
   const scrollTo = (index: number) => {
     const container = containerRef.current
     if (!container) return
-    container.scrollTo({ top: index * container.clientHeight, behavior: 'smooth' })
+    const section = container.querySelectorAll<HTMLElement>(':scope > section')[index]
+    if (!section) return
+    const containerTop = container.getBoundingClientRect().top
+    container.scrollTo({
+      top: section.getBoundingClientRect().top - containerTop + container.scrollTop,
+      behavior: 'smooth',
+    })
   }
 
   return (

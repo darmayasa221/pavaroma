@@ -11,7 +11,7 @@ export default function ContactSection() {
 
   return (
     <section
-      className="relative h-dvh flex flex-col items-center justify-center overflow-hidden bg-bg px-6"
+      className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden bg-bg px-6 py-16"
       style={{ scrollSnapAlign: 'start' }}
     >
       <AmbientLight

@@ -3,6 +3,7 @@ import HeroSection from './components/sections/HeroSection'
 import OriginSection from './components/sections/OriginSection'
 import RoastingSection from './components/sections/RoastingSection'
 import ProductSection from './components/sections/ProductSection'
+import PriceSection from './components/sections/PriceSection'
 import ContactSection from './components/sections/ContactSection'
 import NavDots from './components/ui/NavDots'
 import WhatsAppFAB from './components/ui/WhatsAppFAB'
@@ -11,7 +12,15 @@ import { products } from './data/products'
 import { ScrollContext } from './contexts/ScrollContext'
 import { LangProvider } from './contexts/LangContext'
 
-const SECTIONS = ['hero', 'origin', 'roasting', 'arabica', 'robusta', 'blend', 'contact']
+// Derived from `products` so the nav dots can never desync from the rendered sections.
+const SECTIONS = [
+  'hero',
+  'origin',
+  'roasting',
+  ...products.map((p) => p.id),
+  'price',
+  'contact',
+]
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -33,6 +42,7 @@ export default function App() {
           {products.map((product) => (
             <ProductSection key={product.id} product={product} />
           ))}
+          <PriceSection />
           <ContactSection />
         </div>
       </ScrollContext.Provider>

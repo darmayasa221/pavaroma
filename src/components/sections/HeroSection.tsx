@@ -10,7 +10,7 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative h-dvh flex flex-col items-center justify-center overflow-hidden bg-bg"
+      className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden bg-bg"
       style={{ scrollSnapAlign: 'start' }}
     >
       <AmbientLight

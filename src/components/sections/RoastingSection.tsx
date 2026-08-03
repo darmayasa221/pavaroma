@@ -19,7 +19,7 @@ export default function RoastingSection() {
   return (
     <section
       ref={ref}
-      className="relative h-dvh flex items-center justify-center overflow-hidden bg-bg"
+      className="relative min-h-dvh flex items-center justify-center overflow-hidden bg-bg py-16 md:py-12"
       style={{ scrollSnapAlign: 'start' }}
     >
       <AmbientLight
@@ -67,16 +67,16 @@ export default function RoastingSection() {
 
         {/* Spec cards */}
         <motion.div
-          className="flex gap-4 md:gap-6 mb-10"
+          className="flex flex-wrap justify-center gap-3 md:gap-6 mb-10"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          {(['roastType', 'hulling'] as const).map((key) => (
+          {(['roastType', 'process', 'freshness'] as const).map((key) => (
             <div
               key={key}
-              className="border border-gold/25 px-6 py-4 text-left min-w-[140px] md:min-w-[180px]"
+              className="border border-gold/25 px-5 md:px-6 py-3.5 md:py-4 text-left min-w-[132px] md:min-w-[170px]"
             >
               <p className="text-gold text-[10px] tracking-[0.25em] uppercase mb-2 font-body">
                 {t(`roasting.spec.${key}.label`)}

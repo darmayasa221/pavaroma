@@ -20,7 +20,7 @@ export default function OriginSection() {
   return (
     <section
       ref={ref}
-      className="relative h-dvh flex items-center justify-center overflow-hidden bg-bg"
+      className="relative min-h-dvh flex items-center justify-center overflow-hidden bg-bg py-16 md:py-12"
       style={{ scrollSnapAlign: 'start' }}
     >
       <AmbientLight
@@ -53,17 +53,22 @@ export default function OriginSection() {
           {t('origin.eyebrow')}
         </motion.p>
 
-        {/* Location badge */}
-        <motion.div
-          className="inline-flex items-center gap-2 text-text-muted text-xs font-body mb-10 border border-gold/20 px-5 py-2 rounded-full"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-15%' }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-        >
-          <MapPin size={10} className="text-gold flex-shrink-0" />
-          <span>Desa Pujungan, Pupuan · Tabanan, Bali</span>
-        </motion.div>
+        {/* Location badges — one per terroir */}
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-10">
+          {(['origin.location.robusta', 'origin.location.arabica'] as const).map((key, i) => (
+            <motion.div
+              key={key}
+              className="inline-flex items-center gap-2 text-text-muted text-[11px] md:text-xs font-body border border-gold/20 px-4 py-2 rounded-full"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-15%' }}
+              transition={{ duration: 0.7, delay: 0.1 + i * 0.12 }}
+            >
+              <MapPin size={10} className="text-gold flex-shrink-0" />
+              <span>{t(key)}</span>
+            </motion.div>
+          ))}
+        </div>
 
         {/* Heading */}
         <h2 className="font-display text-3xl md:text-5xl text-text font-normal leading-snug mb-8 max-w-3xl mx-auto">
