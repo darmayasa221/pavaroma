@@ -112,6 +112,10 @@ interface State {
   draft?: Draft
   awaiting?: { field: string; index?: number }
   cardId?: number
+  /** Konteks daftar order: kata kunci + halaman, supaya tombol maju/mundur
+   *  tidak perlu menitipkannya di callback_data yang dibatasi 64 byte. */
+  cari?: string
+  hal?: number
 }
 
 async function getState(chatId: number): Promise<State> {
@@ -367,24 +371,65 @@ async function buatPdf(nomor: string, d: Draft): Promise<Uint8Array> {
 
 // -- Alur bot -------------------------------------------------------------
 
-async function mulaiInvoice(chatId: number) {
-  const { data: orders } = await admin
-    .from('orders')
-    .select('ref, customer_name, total_price, has_paid')
-    .order('created_at', { ascending: false })
-    .limit(8)
+const PER_HAL = 8
 
-  const rows = (orders ?? []).map((o) => [{
-    text: `${o.ref} · ${o.customer_name} · ${rupiah(o.total_price)}${o.has_paid ? ' ✅' : ''}`,
+/**
+ * Daftar order dengan pencarian dan halaman. Tanpa ini, begitu order menumpuk
+ * hanya yang terbaru saja yang bisa dijangkau - order lama jadi tidak akan
+ * pernah terpilih.
+ */
+async function mulaiInvoice(chatId: number, cari = '', hal = 0) {
+  const bangun = () => {
+    let q = admin
+      .from('orders')
+      .select('ref, customer_name, total_price, has_paid', { count: 'exact' })
+    if (cari) {
+      // Kode order selalu 6 huruf/angka; selain itu dianggap nama pembeli.
+      q = /^[2-9A-HJ-NP-Za-hj-np-z]{2,6}$/.test(cari)
+        ? q.ilike('ref', `%${cari}%`)
+        : q.ilike('customer_name', `%${cari}%`)
+    }
+    return q.order('created_at', { ascending: false })
+  }
+
+  // Hitung dulu, baru tentukan halaman. Tombol "Berikutnya" bisa saja basi
+  // (order terhapus setelah daftar dirender); tanpa penjepitan ini halamannya
+  // melewati data dan judulnya jadi omong kosong seperti "25-17 dari 17".
+  const { count } = await bangun().range(0, 0)
+  const total = count ?? 0
+  const halMax = Math.max(0, Math.ceil(total / PER_HAL) - 1)
+  hal = Math.min(Math.max(0, hal), halMax)
+  const dari = hal * PER_HAL
+
+  const { data: orders } = await bangun().range(dari, dari + PER_HAL - 1)
+  const rows: Record<string, string>[][] = (orders ?? []).map((o) => [{
+    text: `${o.ref} - ${o.customer_name} - ${rupiah(o.total_price)}${o.has_paid ? ' \u2705' : ''}`,
     callback_data: `pick:${o.ref}`,
   }])
-  rows.push([{ text: '➕ Invoice kosong', callback_data: 'pick:blank' }])
+
+  const nav: Record<string, string>[] = []
+  if (hal > 0) nav.push({ text: '\u2b05\ufe0f Sebelumnya', callback_data: 'pg:prev' })
+  if (dari + PER_HAL < total) nav.push({ text: 'Berikutnya \u27a1\ufe0f', callback_data: 'pg:next' })
+  if (nav.length) rows.push(nav)
+  rows.push([{ text: '\u2795 Invoice kosong', callback_data: 'pick:blank' }])
+
+  const st = await getState(chatId)
+  st.cari = cari
+  st.hal = hal
+  await setState(chatId, st)
+
+  const judul = total === 0
+    ? (cari ? `\ud83d\udd0d Tidak ada order yang cocok dengan "<b>${esc(cari)}</b>".` : '\ud83e\uddfe Belum ada order.')
+    : [
+        cari ? `\ud83d\udd0d Hasil pencarian "<b>${esc(cari)}</b>"` : '\ud83e\uddfe Pilih order untuk dijadikan invoice',
+        `Menampilkan ${dari + 1}-${Math.min(dari + PER_HAL, total)} dari ${total} order.`,
+        '',
+        '<i>Cari langsung: ketik /invoice lalu kode order atau nama pembeli.</i>',
+        '<i>Contoh: /invoice YJ3YPE  atau  /invoice bagus</i>',
+      ].join('\n')
 
   await tg('sendMessage', {
-    chat_id: chatId,
-    text: (orders ?? []).length
-      ? '🧾 Pilih order yang mau dijadikan invoice:'
-      : '🧾 Belum ada order. Mulai dari invoice kosong:',
+    chat_id: chatId, text: judul, parse_mode: 'HTML',
     reply_markup: { inline_keyboard: rows },
   })
 }
@@ -531,6 +576,12 @@ Deno.serve(async (req) => {
         return new Response('ok')
       }
 
+      if (data === 'pg:next' || data === 'pg:prev') {
+        const hal = Math.max(0, (st.hal ?? 0) + (data === 'pg:next' ? 1 : -1))
+        await mulaiInvoice(chatId, st.cari ?? '', hal)
+        return new Response('ok')
+      }
+
       if (!st.draft) {
         await tg('sendMessage', { chat_id: chatId, text: 'Draft sudah tidak aktif. Ketik /invoice untuk mulai lagi.' })
         return new Response('ok')
@@ -596,6 +647,7 @@ Deno.serve(async (req) => {
           `👋 Bot ${BUSINESS.name}`, '',
           'Perintah yang tersedia:',
           '/invoice — buat invoice dari order atau dari kosong',
+          '/invoice <kode atau nama> - cari order tertentu',
           '/batal — buang draft yang sedang dibuat',
         ].join('\n'),
       })
@@ -606,7 +658,11 @@ Deno.serve(async (req) => {
       await tg('sendMessage', { chat_id: chatId, text: 'Draft dibuang.' })
       return new Response('ok')
     }
-    if (teks.startsWith('/invoice')) { await mulaiInvoice(chatId); return new Response('ok') }
+    if (teks.startsWith('/invoice')) {
+      const arg = teks.slice('/invoice'.length).trim().slice(0, 40)
+      await mulaiInvoice(chatId, arg, 0)
+      return new Response('ok')
+    }
 
     // Teks biasa = jawaban atas pertanyaan yang sedang menunggu
     const st = await getState(chatId)
