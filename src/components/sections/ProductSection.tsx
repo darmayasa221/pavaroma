@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 import type { Product } from '../../data/products'
-import { WHATSAPP_NUMBER } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
 import { useLang } from '../../contexts/LangContext'
 
@@ -143,28 +143,27 @@ export default function ProductSection({ product }: Props) {
           </p>
         </motion.div>
 
-        {product.customRatio && (
-          <motion.div
-            className="mt-4 md:mt-6 pt-4 md:pt-5 border-t border-gold/20"
-            initial={RISE}
-            whileInView={SETTLE}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.7, delay: 0.7 }}
-          >
-            <p className="text-text-muted text-xs md:text-sm font-body mb-2 md:mb-3 max-w-sm">
+        <motion.div
+          className="mt-4 md:mt-6 pt-4 md:pt-5 border-t border-gold/20"
+          initial={RISE}
+          whileInView={SETTLE}
+          viewport={VIEWPORT}
+          transition={{ duration: 0.7, delay: 0.7 }}
+        >
+          {/* The ratio is now picked in the order form, so this is just context. */}
+          {product.customRatio && (
+            <p className="text-text-muted text-xs md:text-sm font-body mb-3 max-w-sm">
               {t('product.blend.customText')}
             </p>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('product.blend.customMsg'))}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-gold text-xs tracking-[0.18em] uppercase hover:text-gold-light transition-colors duration-300"
-            >
-              {t('product.blend.customCta')}
-              <span className="text-base leading-none">→</span>
-            </a>
-          </motion.div>
-        )}
+          )}
+          <Link
+            to={`/product/${product.id}`}
+            className="inline-flex items-center gap-2 border border-gold text-gold px-6 py-3 text-xs tracking-[0.15em] uppercase font-body hover:bg-gold hover:text-bg transition-colors duration-300"
+          >
+            {t('product.orderCta')}
+            <span className="text-base leading-none">→</span>
+          </Link>
+        </motion.div>
       </div>
     </section>
   )

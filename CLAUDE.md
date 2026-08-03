@@ -2,6 +2,8 @@
 
 ## Project
 - Brand: Pavaroma — "Awaken the True Aroma"
+- Landing page (scroll-snap) + halaman detail produk dengan form order & review.
+  Pembayaran di luar sistem — pelanggan transfer manual lalu upload bukti.
 - Products — all Grade 1, Medium to Dark Roast, Semi Wash:
   - **Arabica Kintamani** — Bangli highlands, Bali
   - **Fine Robusta Pupuan** — Tabanan highlands, Bali
@@ -13,6 +15,27 @@
 - Animation: `motion` package (NOT framer-motion) — import from `motion/react`
 - Styling: Tailwind CSS v4 via `@tailwindcss/vite` plugin — no tailwind.config.js
 - Icons: `lucide-react`
+- Routing: `react-router-dom` — `/` dan `/product/:productId`
+- Backend: Supabase (Postgres + Storage + Edge Functions)
+- `tsconfig.app.json` menyalakan **`erasableSyntaxOnly`** — parameter property
+  (`constructor(private x)`), enum, dan namespace ditolak. Deklarasikan field manual.
+
+## Backend & data
+- Skema ada di `supabase/schema.sql` — jalankan di SQL Editor. Idempotent.
+- **Tabel `orders` sengaja tidak punya policy anon.** Browser tidak pernah menulis
+  ke sana; semua lewat Edge Function `submit-order` (service_role). Kalau browser
+  boleh insert, ia juga bisa mengarang harga, dan anon key itu terlihat publik.
+- Harga dihitung ulang di Edge Function. Tabel harga **diduplikasi** di
+  `src/data/pricing.ts` dan `supabase/functions/submit-order/index.ts` —
+  ubah di KEDUA tempat.
+- Bucket `payment-proofs` **private**, anon hanya boleh INSERT. Owner melihat
+  bukti transfer lewat signed URL yang dibuat Edge Function.
+- Review tampil langsung tanpa moderasi. Proteksi: honeypot di form + trigger
+  throttle di DB. Kalau spam lolos, pasang Cloudflare Turnstile.
+- Notifikasi order: `NOTIFY_PROVIDER` env di Supabase Edge Function Secrets —
+  `console` (default, hanya log) | `callmebot` | `whatsapp_cloud` | `telegram`.
+  Menambah provider = satu `case` baru di `notify()`, tidak menyentuh form/DB.
+- Kegagalan notifikasi TIDAK menggagalkan order — pelanggan mungkin sudah bayar.
 
 ## Commands
 - `pnpm dev` — start dev server

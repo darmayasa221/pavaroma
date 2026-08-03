@@ -29,3 +29,24 @@ const idr = new Intl.NumberFormat("id-ID");
 
 /** 230000 → "Rp 230.000" — dot separators in both locales, as printed on the list. */
 export const formatPrice = (value: number): string => `Rp ${idr.format(value)}`;
+
+/** "75:25" — the wire format for a blend ratio, stored on the order row. */
+export const blendVariant = (row: BlendPrice): string => `${row.arabica}:${row.robusta}`;
+
+/** The default blend ratio offered when the detail page first opens. */
+export const DEFAULT_BLEND_VARIANT = blendVariant(BLEND_PRICES[3]); // 60:40
+
+/**
+ * Price per kg for a product, resolved the same way on the detail page and in
+ * the Edge Function, so the total a customer sees is the total that gets stored.
+ * Returns null when the variant doesn't exist — callers must reject the order
+ * rather than guess a price.
+ */
+export function resolveUnitPrice(productId: string, variant?: string | null): number | null {
+  if (productId === "blend") {
+    const row = BLEND_PRICES.find((r) => blendVariant(r) === variant);
+    return row ? row.price : null;
+  }
+  const single = SINGLE_PRICES.find((r) => r.id === productId);
+  return single ? single.price : null;
+}

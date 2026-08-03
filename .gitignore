@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Kredensial lokal — jangan pernah di-commit
+note.txt
+*.secret

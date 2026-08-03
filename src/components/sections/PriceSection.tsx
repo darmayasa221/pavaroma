@@ -1,7 +1,5 @@
 import { motion } from 'motion/react'
-import { MessageCircle } from 'lucide-react'
 import { BLEND_PRICES, SINGLE_PRICES, formatPrice } from '../../data/pricing'
-import { WHATSAPP_NUMBER } from '../../data/products'
 import GoldLine from '../ui/GoldLine'
 import AmbientLight from '../ui/AmbientLight'
 import { useLang } from '../../contexts/LangContext'
@@ -49,7 +47,6 @@ function GroupHeading({ children, delay }: { children: string; delay: number }) 
 
 export default function PriceSection() {
   const { t } = useLang()
-  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('price.ctaMsg'))}`
 
   return (
     <section
@@ -111,8 +108,10 @@ export default function PriceSection() {
           </ul>
         </div>
 
+        {/* Tanpa CTA WhatsApp: pemesanan kini lewat form di halaman produk, dan
+            tombol chat manual di sini justru menariknya keluar dari alur itu. */}
         <motion.p
-          className="text-text-muted/60 text-[10px] md:text-xs tracking-[0.15em] uppercase font-body mt-5 mb-6"
+          className="text-text-muted/60 text-[10px] md:text-xs tracking-[0.15em] uppercase font-body mt-5"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -120,22 +119,6 @@ export default function PriceSection() {
         >
           {t('price.note')}
         </motion.p>
-
-        <motion.a
-          href={waUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2.5 border border-gold text-gold px-7 py-3 text-xs tracking-[0.15em] uppercase font-body font-medium"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 1 }}
-          whileHover={{ backgroundColor: '#C9A84C', color: '#080808' }}
-          whileTap={{ scale: 0.97 }}
-        >
-          <MessageCircle size={15} />
-          {t('price.cta')}
-        </motion.a>
       </div>
     </section>
   )
