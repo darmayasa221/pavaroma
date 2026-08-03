@@ -169,3 +169,69 @@ create policy "proofs: anon upload only"
   on storage.objects for insert
   to anon, authenticated
   with check (bucket_id = 'payment-proofs');
+
+-- ─────────────────────────────────────────────────────────────
+-- 4. INVOICE (dibuat lewat bot Telegram)
+-- ─────────────────────────────────────────────────────────────
+
+create sequence if not exists public.invoice_seq start 1;
+
+create or replace function public.next_invoice_number()
+returns text language sql security definer set search_path = public as $$
+  select 'INV-' || lpad(nextval('public.invoice_seq')::text, 4, '0');
+$$;
+revoke all on function public.next_invoice_number() from public, anon, authenticated;
+
+create table if not exists public.invoices (
+  id               uuid primary key default gen_random_uuid(),
+  number           text        not null unique,
+  order_ref        text,
+  customer_name    text        not null,
+  customer_phone   text,
+  customer_address text,
+  note             text,
+  has_paid         boolean     not null default false,
+  total            integer     not null default 0,
+  pdf_path         text,
+  created_by       bigint,                    -- chat_id Telegram pembuatnya
+  created_at       timestamptz not null default now()
+);
+create index if not exists invoices_created_at_idx on public.invoices (created_at desc);
+
+create table if not exists public.invoice_items (
+  id          uuid primary key default gen_random_uuid(),
+  invoice_id  uuid not null references public.invoices(id) on delete cascade,
+  position    int  not null,
+  name        text not null,
+  description text,
+  qty         numeric(10,2) not null check (qty > 0),
+  unit        text not null default 'Kg',
+  unit_price  integer not null check (unit_price >= 0),
+  amount      integer not null check (amount >= 0)
+);
+create index if not exists invoice_items_invoice_idx on public.invoice_items (invoice_id, position);
+
+-- Telegram tidak menyimpan konteks percakapan; tanpa tabel ini bot lupa
+-- sedang mengedit apa begitu pesan berikutnya masuk.
+create table if not exists public.telegram_sessions (
+  chat_id    bigint primary key,
+  state      jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+-- Ketiganya HANYA disentuh Edge Function (service role). Tidak ada GRANT ke
+-- anon/authenticated, dan RLS menyala sebagai lapis kedua.
+alter table public.invoices          enable row level security;
+alter table public.invoice_items     enable row level security;
+alter table public.telegram_sessions enable row level security;
+revoke all on public.invoices          from anon, authenticated;
+revoke all on public.invoice_items     from anon, authenticated;
+revoke all on public.telegram_sessions from anon, authenticated;
+revoke all on sequence public.invoice_seq from anon, authenticated;
+
+-- Arsip PDF invoice. Privat — invoice memuat nama, alamat, dan nominal.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('invoices', 'invoices', false, 10485760, array['application/pdf'])
+on conflict (id) do update
+  set public = false, file_size_limit = 10485760,
+      allowed_mime_types = array['application/pdf'];
